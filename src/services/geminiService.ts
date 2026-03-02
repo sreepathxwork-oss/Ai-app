@@ -1,6 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is missing. Please set it in your environment variables.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export interface AIInsight {
   id: string;
@@ -12,6 +23,7 @@ export interface AIInsight {
 }
 
 export async function fetchAIInsights(count: number = 5, existingIds: string[] = []): Promise<AIInsight[]> {
+  const ai = getAI();
   const prompt = `Generate ${count} unique insights about Artificial Intelligence. 
   Each insight should be either a 'merit' (advantage) or a 'demerit' (disadvantage/risk).
   Avoid these specific IDs if possible: ${existingIds.join(', ')}.

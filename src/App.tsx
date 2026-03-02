@@ -93,8 +93,9 @@ export default function App() {
       } else {
         setInsights(prev => [...prev, ...newInsights]);
       }
-    } catch (err) {
-      setError("Failed to fetch more insights. Please try again.");
+    } catch (err: any) {
+      const message = err.message || "Failed to fetch more insights. Please try again.";
+      setError(message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -146,6 +147,26 @@ export default function App() {
         </div>
 
         <div className="space-y-2">
+          {error && error.includes("GEMINI_API_KEY") && (
+            <div className="bg-amber-50 border border-amber-200 p-6 rounded-3xl text-center mb-8">
+              <AlertTriangle size={40} className="mx-auto text-amber-500 mb-4" />
+              <h3 className="text-lg font-bold text-amber-900 mb-2">Configuration Required</h3>
+              <p className="text-amber-700 text-sm mb-4">
+                The Gemini API Key is missing. This is required to generate insights.
+              </p>
+              <div className="text-left bg-white/50 p-4 rounded-xl text-xs font-mono text-amber-800 break-all mb-4">
+                1. Go to Netlify Dashboard<br/>
+                2. Site configuration &gt; Environment variables<br/>
+                3. Add GEMINI_API_KEY
+              </div>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-amber-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors"
+              >
+                I've added it, Refresh
+              </button>
+            </div>
+          )}
           <AnimatePresence>
             {insights.map((insight, index) => (
               <InsightCard key={`${insight.id}-${index}`} insight={insight} index={index} />
